@@ -34,7 +34,7 @@ builds:
     - repo: _
       dport:
       container: alpine
-      tag: 3.9
+      tag: 3.8
   steps:
     - name: opnfv/functest-xtesting
       containers:
