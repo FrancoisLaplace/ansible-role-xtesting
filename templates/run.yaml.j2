@@ -216,67 +216,8 @@
       - '{{ project }}-{repo}-{container}-{tag}-{test}-run'
 
 {% endfor %}
-- job-template:
-    name: '{{ project }}-{tag}-daily'
-    project-type: multijob
-{% if triggers %}
-    triggers:
-{% for trigger in triggers %}
-{% for key, value in trigger.iteritems() %}
-      - {{ key }}: '{{ value}}'
-{% endfor %}
-{% endfor %}
-{% endif %}
-    parameters:
-{% if slave %}
-      - {{ project }}-slave
-{% endif %}
-    properties:
-      - build-blocker:
-          use-build-blocker: true
-          {{ block_level_key }}: 'NODE'
-          blocking-jobs:
-            - '^{{ project }}-[a-z]+-(daily|check|gate)$'
-    builders:
-      - multijob:
-          name: remove former images
-          projects:
-{% for suite in suites %}
-            - name: '{{ project }}-{{ repo }}-{{ suite.container }}-{tag}-rmi'
-              <<: *{{ project }}-jobs
-{% endfor %}
-      - multijob:
-          name: pull containers
-          projects:
-{% for suite in suites %}
-            - name: '{{ project }}-{{ repo }}-{{ suite.container }}-{tag}-pull'
-              <<: *{{ project }}-jobs
-{% endfor %}
-{% for suite in suites %}
-      - multijob:
-          name: {{ repo }}/{{ suite.container }}:{tag}
-          projects:
-{% for test in suite.tests %}
-            - name: '{{ project }}-{{ repo }}-{{ suite.container }}-{tag}-{{ test }}-run'
-              <<: *{{ project }}-jobs
-{% endfor %}
-{% endfor %}
 
 {% if gerrit %}
-- job-template:
-    name: '{{ project }}-{repo}-{container}-{tag}-gate'
-    parameters:
-{% if slave %}
-      - {{ project }}-slave
-{% endif %}
-    scm:
-      - {{ project }}-scm:
-          ref: $GERRIT_REFSPEC
-    builders:
-      - {{ project }}-build-containers:
-          <<: *{{ project }}-build-containers
-          ref: $GERRIT_REFSPEC
-
 - job-template:
     name: '{{ project }}-{repo}-{container}-{tag}-check'
     parameters:
@@ -332,7 +273,6 @@
 {% endif %}
     path: {{ container.path }}
     jobs:
-      - '{{ project }}-{repo}-{container}-{tag}-gate'
       - '{{ project }}-{repo}-{container}-{tag}-check'
 
 {% endfor %}
@@ -351,7 +291,7 @@
           use-build-blocker: true
           {{ block_level_key }}: 'NODE'
           blocking-jobs:
-            - '^{{ project }}-[a-z]+-(daily|check|gate)$'
+            - '^{{ project }}-[a-z]+-(check)$'
     builders:
       - multijob:
           name: remove former images
@@ -415,73 +355,14 @@
             failed: false
             unstable: false
             notbuilt: false
-
-- job-template:
-    name: '{{ project }}-{tag}-gate'
-    project-type: multijob
-    triggers:
-      - {{ project }}-patchset-created:
-          branch: '{branch}'
-    parameters:
-{% if slave %}
-      - {{ project }}-slave
-{% endif %}
-    properties:
-      - build-blocker:
-          use-build-blocker: true
-          {{ block_level_key }}: 'NODE'
-          blocking-jobs:
-            - '^{{ project }}-[a-z]+-(daily|check|gate)$'
-    builders:
-      - multijob:
-          name: remove former images
-          projects:
-{% for suite in suites %}
-            - name: '{{ project }}-{{ repo }}-{{ suite.container }}-{tag}-rmi'
-              <<: *{{ project }}-jobs
-{% endfor %}
-{% for dep in builds.dependencies %}
-      - multijob:
-          name: remove dependencies
-          projects:
-            - name: '{{ project }}-{{ dep.repo }}-{{ dep.container }}-{{ dep.tag }}-rmi'
-              <<: *{{ project }}-jobs
-{% endfor %}
-{% for dep in builds.dependencies %}
-      - multijob:
-          name: pull dependencies
-          projects:
-            - name: '{{ project }}-{{ dep.repo }}-{{ dep.container }}-{{ dep.tag }}-pull'
-              <<: *{{ project }}-jobs
-{% endfor %}
-{% for step in builds.steps %}
-      - multijob:
-          name: {{ step.name }}
-          projects:
-{% for container in step.containers %}
-            - name: '{{ project }}-{{ repo }}-{{ container.name }}-{tag}-gate'
-              <<: *{{ project }}-jobs
-{% endfor %}
-{% endfor %}
-{% for suite in suites %}
-      - multijob:
-          name: {{ repo }}/{{ suite.container }}:{tag}
-          projects:
-{% for test in suite.tests %}
-            - name: '{{ project }}-{{ repo }}-{{ suite.container }}-{tag}-{{ test }}-run'
-              <<: *{{ project }}-jobs
-{% endfor %}
-{% endfor %}
 {% endif %}
 
 - project:
     name: '{{ project }}'
     <<: *{{ project }}-params
     jobs:
-      - '{{ project }}-{tag}-daily'
 {% if gerrit %}
       - '{{ project }}-{tag}-check'
-      - '{{ project }}-{tag}-gate'
 {% endif %}
 
 - view:
@@ -494,4 +375,4 @@
       - last-success
       - last-failure
       - last-duration
-    regex: ^{{ project }}-[a-z]+-(daily|check|gate)$
+    regex: ^{{ project }}-[a-z]+-(check)$
