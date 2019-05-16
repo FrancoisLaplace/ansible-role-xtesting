@@ -118,7 +118,7 @@
 {% for volume in docker_args.volumes %}
             -v {{ volume }} \
 {% endfor %}
-            $image /bin/bash -c '/home/opnfv/functest/hooks/run_hooks.sh gambia && run_tests -t {test}{% if publish["db"] is sameas true %} -r'
+            $image /bin/bash -c '{% for command in docker_args.commands %}{{ command }} && {% endfor %}run_tests -t {test}{% if publish["db"] is sameas true %} -r'
 {% else %}
 
 {% endif %}
