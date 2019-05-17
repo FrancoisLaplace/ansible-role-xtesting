@@ -277,8 +277,10 @@
 
 {% endfor %}
 {% endfor %}
+
+{% for suite in suites %}
 - job-template:
-    name: '{{ project }}-{tag}-check'
+    name: '{{ project }}-{{ suite.container }}-{tag}-check'
     project-type: multijob
     parameters:
 {% if slave %}
@@ -301,7 +303,6 @@
               <<: *{{ project }}-jobs
 {% endfor %}
 
-{% for suite in suites %}
       - multijob:
           name: {{ repo }}/{{ suite.container }}:{tag}
           projects:
@@ -340,7 +341,9 @@
     <<: *{{ project }}-params
     jobs:
 {% if gerrit %}
-      - '{{ project }}-{tag}-check'
+{% for suite in suites %}
+      - '{{ project }}-{{ suite.container }}-{tag}-check'
+{% endfor %}
 {% endif %}
 
 - view:
