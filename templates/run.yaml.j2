@@ -57,20 +57,6 @@
     path: '{path}'
 
 - builder:
-    name: {{ project }}-pull-containers
-    builders:
-      - shell: |
-          set +x
-          if [ "{repo}" = "_" ]; then
-            image={container}:{tag}
-          elif [ "{port}" = "None" ]; then
-            image={repo}/{container}:{tag}
-          else
-            image={repo}:{port}/{container}:{tag}
-          fi
-          {{ sudo1 }}docker pull $image
-
-- builder:
     name: {{ project }}-build-containers
     builders:
       - shell: |
@@ -142,26 +128,6 @@
 {% endif %}
 
 - job-template:
-    name: '{{ project }}-{repo}-{container}-{tag}-pull'
-    parameters:
-{% if slave %}
-      - {{ project }}-slave
-{% endif %}
-    builders:
-      - {{ project }}-pull-containers:
-          <<: *{{ project }}-containers
-
-{% for suite in suites %}
-- project:
-    name: '{{ project }}-{{ repo }}-{{ suite.container }}-pull'
-    <<: *{{ project }}-params
-    container: '{{ suite.container }}'
-    jobs:
-      - '{{ project }}-{repo}-{container}-{tag}-pull'
-
-{% endfor %}
-
-- job-template:
     name: '{{ project }}-{repo}-{container}-{tag}-{test}-run'
     parameters:
 {% if slave %}
@@ -201,23 +167,6 @@
       - {{ project }}-build-containers:
           <<: *{{ project }}-build-containers
           ref: $branch
-
-{% for dep in builds.dependencies %}
-
-- project:
-    name: '{{ project }}-{{ dep.repo }}-{{ dep.container }}-{{ dep.tag }}-pull'
-    repo:{% if dep.repo %} {{ dep.repo }}
-{% else %}{{ None }}
-{% endif %}
-    port:{% if dep.dport %} {{ dep.dport }}
-{% else %}{{ None }}
-{% endif %}
-    container: {{ dep.container }}
-    tag: {{ dep.tag }}
-    jobs:
-      - '{{ project }}-{repo}-{container}-{tag}-pull'
-
-{% endfor %}
 
 {% for step in builds.steps %}
 {% for container in step.containers %}
