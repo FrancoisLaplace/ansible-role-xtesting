@@ -57,14 +57,20 @@
   pause:
     seconds: 30
 - name: Creating jenkins_jobs.ini
+  tags:
+    - jenkins
   template:
     src: jenkins_jobs.ini.j2
     dest: /tmp/jenkins_jobs.ini
 - name: Creating {{ project }}.yaml
+  tags:
+    - jenkins
   template:
     src: run.yaml.j2
     dest: /tmp/{{ project }}.yaml
 - name: Loading Jenkins jobs
+  tags:
+      - jenkins
   command: |
     /tmp/venv/bin/jenkins-jobs --conf \
       /tmp/jenkins_jobs.ini update /tmp/{{ project }}.yaml
