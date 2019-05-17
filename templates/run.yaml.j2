@@ -45,6 +45,11 @@
     container: '{container}'
     tag: '{tag}'
 
+- {{ project }}-run-containers: &{{ project }}-run-containers
+    name: '{{ project }}-build-containers'
+    <<: *{{ project }}-containers
+    test: '{test}'
+
 - builder:
     name: {{ project }}-run-containers
     builders:
