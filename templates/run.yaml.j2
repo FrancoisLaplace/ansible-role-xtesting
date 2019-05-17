@@ -298,10 +298,8 @@
       - multijob:
           name: remove former images
           projects:
-{% for suite in suites %}
             - name: '{{ project }}-{{ repo }}-{{ suite.container }}-{tag}-rmi'
               <<: *{{ project }}-jobs
-{% endfor %}
 
       - multijob:
           name: {{ repo }}/{{ suite.container }}:{tag}
