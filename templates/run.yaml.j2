@@ -314,15 +314,7 @@
             - name: '{{ project }}-{{ dep.repo }}-{{ dep.container }}-{{ dep.tag }}-pull'
               <<: *{{ project }}-jobs
 {% endfor %}
-{% for step in builds.steps %}
-      - multijob:
-          name: {{ step.name }}
-          projects:
-{% for container in step.containers %}
-            - name: '{{ project }}-{{ repo }}-{{ container.name }}-{tag}-check'
-              <<: *{{ project }}-jobs
-{% endfor %}
-{% endfor %}
+
 {% for suite in suites %}
       - multijob:
           name: {{ repo }}/{{ suite.container }}:{tag}
