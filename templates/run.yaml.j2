@@ -300,20 +300,6 @@
             - name: '{{ project }}-{{ repo }}-{{ suite.container }}-{tag}-rmi'
               <<: *{{ project }}-jobs
 {% endfor %}
-{% for dep in builds.dependencies %}
-      - multijob:
-          name: remove dependencies
-          projects:
-            - name: '{{ project }}-{{ dep.repo }}-{{ dep.container }}-{{ dep.tag }}-rmi'
-              <<: *{{ project }}-jobs
-{% endfor %}
-{% for dep in builds.dependencies %}
-      - multijob:
-          name: pull dependencies
-          projects:
-            - name: '{{ project }}-{{ dep.repo }}-{{ dep.container }}-{{ dep.tag }}-pull'
-              <<: *{{ project }}-jobs
-{% endfor %}
 
 {% for suite in suites %}
       - multijob:
