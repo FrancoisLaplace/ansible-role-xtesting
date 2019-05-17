@@ -278,6 +278,41 @@
 {% endfor %}
 {% endfor %}
 
+- job-template:
+    name: '{{ project }}-{tag}-all-check'
+    project-type: multijob
+    parameters:
+{% if slave %}
+      - {{ project }}-slave
+{% endif %}
+      - {{ project }}-branch:
+          branch: '{branch}'
+    properties:
+      - build-blocker:
+          use-build-blocker: true
+          {{ block_level_key }}: 'NODE'
+          blocking-jobs:
+            - '^{{ project }}-[a-z]+-(check)$'
+    builders:
+      - multijob:
+          name: remove former images
+          projects:
+{% for suite in suites %}
+            - name: '{{ project }}-{{ repo }}-{{ suite.container }}-{tag}-rmi'
+              <<: *{{ project }}-jobs
+{% endfor %}
+
+{% for suite in suites %}
+      - multijob:
+          name: {{ repo }}/{{ suite.container }}:{tag}
+          projects:
+{% for test in suite.tests %}
+            - name: '{{ project }}-{{ repo }}-{{ suite.container }}-{tag}-{{ test }}-run'
+              <<: *{{ project }}-jobs
+{% endfor %}
+{% endfor %}
+
+
 {% for suite in suites %}
 - job-template:
     name: '{{ suite.container }}-{tag}-check'
@@ -332,6 +367,14 @@
             failed: false
             unstable: false
             notbuilt: false
+{% endif %}
+
+- project:
+    name: '{{ project }}-all'
+    <<: *{{ project }}-params
+    jobs:
+{% if gerrit %}
+    - '{{ project }}-{tag}-all-check'
 {% endif %}
 
 - project:
