@@ -45,39 +45,6 @@
     container: '{container}'
     tag: '{tag}'
 
-- {{ project }}-run-containers: &{{ project }}-run-containers
-    name: '{{ project }}-build-containers'
-    <<: *{{ project }}-containers
-    test: '{test}'
-
-- {{ project }}-build-containers: &{{ project }}-build-containers
-    name: '{{ project }}-build-containers'
-    <<: *{{ project }}-containers
-    ref_arg: '{ref_arg}'
-    path: '{path}'
-
-- builder:
-    name: {{ project }}-build-containers
-    builders:
-      - shell: |
-          set +x
-          if [ "{repo}" = "_" ]; then
-            image={container}:{tag}
-          elif [ "{port}" = "None" ]; then
-            image={repo}/{container}:{tag}
-          else
-            image={repo}:{port}/{container}:{tag}
-          fi
-          if [ "{ref_arg}" = "None" ]; then
-            build_arg=""
-          else
-            build_arg="--build-arg {ref_arg}={ref}"
-          fi
-          cd {path}
-          {{ sudo1 }}docker build $build_arg \
-            --pull=false --no-cache --force-rm=true \
-            -t $image .
-
 - builder:
     name: {{ project }}-run-containers
     builders:
@@ -163,26 +130,6 @@
     scm:
       - {{ project }}-scm:
           ref: $branch
-    builders:
-      - {{ project }}-build-containers:
-          <<: *{{ project }}-build-containers
-          ref: $branch
-
-{% for step in builds.steps %}
-{% for container in step.containers %}
-- project:
-    name: {{ project }}-{{ repo }}-{{ container.name }}-{tag}-build
-    <<: *{{ project }}-params
-    container: {{ container.name }}
-    ref_arg:{% if container.ref_arg %} {{ container.ref_arg }}
-{% else %}{{ None }}
-{% endif %}
-    path: {{ container.path }}
-    jobs:
-      - '{{ project }}-{repo}-{container}-{tag}-check'
-
-{% endfor %}
-{% endfor %}
 
 - job-template:
     name: '{{ project }}-{tag}-all-check'
