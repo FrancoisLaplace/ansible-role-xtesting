@@ -16,6 +16,7 @@ sudo1:
 use_testapi: true
 use_jenkins: true
 jenkins_workspace: /data/jenkins/workspace
+jenkins_home: /var/jenkins_home
 publish:
   db: true
   cmd: mc cp -r

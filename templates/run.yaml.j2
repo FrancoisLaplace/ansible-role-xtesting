@@ -63,6 +63,13 @@
           else
             image={repo}:{port}/{container}:{tag}
           fi
+
+          for file in {{ jenkins_home }}/opnfv/functest/conf/*.sh ; do
+            if [ -f "$file" ] ; then
+              . "$file"
+            fi
+          done
+
           {{ sudo1 }}docker run --rm \
 {% if use_testapi %}
             --link testapi:testapi \
