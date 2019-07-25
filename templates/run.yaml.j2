@@ -89,10 +89,10 @@
 {% endif %}
           res=$?
           {{ publish["cmd"] }} $WORKSPACE/ \
-            {{ publish["repo"] }}/$JOB_NAME-$BUILD_ID > /dev/null 2>&1
+            {{ publish["repo"] }}/$JOB_NAME-{% raw %}${{REGRESSION_TAG:-$BUILD_ID}}{% endraw %} > /dev/null 2>&1
           find $WORKSPACE -type f \
             -printf \
-            "{{ publish["www"] }}/$JOB_NAME-$BUILD_ID/%P\n"
+            "{{ publish["www"] }}/$JOB_NAME-{% raw %}${{REGRESSION_TAG:-$BUILD_ID}}{% endraw %}/%P\n"
           exit $res
 
 {% if gerrit %}
