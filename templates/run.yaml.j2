@@ -83,6 +83,11 @@
 {% for volume in docker_args.volumes %}
             -v {{ volume }} \
 {% endfor %}
+{% if 'hosts' in docker_args %}
+{% for host in docker_args.hosts %}
+            --add-host={{ host }} \
+{% endfor %}
+{% endif %}
             $image /bin/bash -c '{% for command in docker_args.commands %}{{ command }} && {% endfor %}run_tests -t {test}{% if publish["db"] is sameas true %} -r'
 {% else %}
 
