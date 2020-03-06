@@ -29,6 +29,7 @@ docker_args:
   env: {}
   volumes: []
   hosts: []
+volume_prefix: ""
 triggers:
   - timed: '@daily'
 repo: opnfv
