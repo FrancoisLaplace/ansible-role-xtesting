@@ -1,5 +1,7 @@
 ---
 - name: Installing jenkins-job-builder
+  tags:
+    - jenkins
   pip:
     name: jenkins-job-builder
     virtualenv: /tmp/venv
