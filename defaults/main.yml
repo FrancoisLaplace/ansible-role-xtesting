@@ -12,6 +12,7 @@ db_project: "{{ project }}"
 gerrit: gerrit.opnfv.org
 gerrit_project: functest-xtesting
 slave:
+node:
 block_level_key: block-level
 sudo1:
 use_testapi: true

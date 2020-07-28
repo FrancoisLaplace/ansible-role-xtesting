@@ -115,6 +115,7 @@
 
 - job-template:
     name: '{{ project }}-{repo}-{container}-{tag}-{test}-run'
+    node: '{{ node }}'
     parameters:
 {% if slave %}
       - {{ project }}-slave
@@ -255,4 +256,4 @@
       - last-success
       - last-failure
       - last-duration
-    regex: ^{{ project }}-[a-z]+-(check)$
+    regex: ^{{ project }}-[a-z-]+-(check)$
